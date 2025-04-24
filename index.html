@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>اختبارات تفاعلية تعليمية 🧮</title>
+    <!-- خط Cairo بدلاً من Tajawal -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
@@ -15,7 +16,31 @@
             margin: 0;
             padding: 20px;
             color: white;
-            font-family: 'Tajawal', sans-serif;
+            font-family: 'Cairo', 'Arial', sans-serif;
+        }
+
+        /* توحيد الخط في كل العناصر */
+        body,
+        *,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        div,
+        button,
+        input,
+        select,
+        textarea,
+        span,
+        .option,
+        .option-text,
+        .restart-btn,
+        .nav-btn {
+            font-family: 'Cairo', 'Arial', sans-serif !important;
+            font-weight: 400;
         }
 
         .container {
@@ -302,14 +327,7 @@
             }
         }
     </style>
-
-    body, *, h1, h2, h3, h4, h5, h6, p, div, button, input, select, textarea, span, .option, .option-text, .restart-btn,
-    .nav-btn {
-    font-family: 'Cairo', 'Arial', sans-serif !important;
-    }
-
 </head>
-
 <body>
     <div class="container">
         <div class="header">

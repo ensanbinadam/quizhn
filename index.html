@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <style>
-        /* نفس تنسيق النسخة الأولى ... بدون تعديل */
         body {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
@@ -74,7 +73,7 @@
             text-align: center;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: center
         }
 
         .option:hover {
@@ -302,12 +301,13 @@
                 overflow-x: scroll;
             }
         }
-
-        body, *, h1, h2, h3, h4, h5, h6, p, div, button, input, select, textarea, span, .option, .option-text, .restart-btn, .nav-btn {
-    font-family: 'Cairo', 'Arial', sans-serif !important;
-}
-
     </style>
+
+    body, *, h1, h2, h3, h4, h5, h6, p, div, button, input, select, textarea, span, .option, .option-text, .restart-btn,
+    .nav-btn {
+    font-family: 'Cairo', 'Arial', sans-serif !important;
+    }
+
 </head>
 
 <body>
@@ -317,9 +317,9 @@
             <p id="instructions">اختر الإجابة الصحيحة لكل سؤال قبل انتهاء الوقت</p>
         </div>
         <div class="counters" id="countersBox">
-            <div id="questionCounter">📌 السؤال 0 من 0</div>
-            <div id="timer">⏳ الوقت المتبقي: 0 ثانية</div>
-            <div id="scoreCounter">🏆 الدرجات: 0 من 0</div>
+            <div id="questionCounter">📌 السؤال ٠ من ٠</div>
+            <div id="timer">⏳ الوقت المتبقي: ٠ ثانية</div>
+            <div id="scoreCounter">🏆 الدرجات: ٠ من ٠</div>
         </div>
         <div class="reading-text" id="readingText"></div>
         <div class="quiz-box">
@@ -335,11 +335,11 @@
         </div>
     </div>
     <div class="score-board" id="scoreBoard">
-        <h2>نتيجتك النهائية: <span id="totalQuestions">0</span>/<span id="finalScore">0</span></h2>
+        <h2>نتيجتك النهائية: <span id="totalQuestions">٠</span>/<span id="finalScore">٠</span></h2>
         <button class="restart-btn" onclick="restartQuiz()">إعادة المحاولة</button>
     </div>
     <script>
-        /* كلاس المعادلات الرياضية (دون تغيير للأرقام) */
+        /* ========== نفس معالجة المعادلات الرياضية ========== */
         class UnifiedEquationRenderer {
             constructor() {
                 this.checkKaTeXLoaded();
@@ -379,13 +379,41 @@
                 if (/\\frac\{.*\}\{.*\}/.test(input) || /\\sqrt\{.*\}/.test(input)) return 'latex';
                 return 'unknown';
             }
-            convertToLaTeX(input) { return input; }
+            convertToLaTeX(input) {
+                const format = this.detectFormat(input); let result;
+                switch (format) {
+                    case 'latex': result = input; break;
+                    case 'mathml': result = input; break;
+                    case 'omml': result = input; break;
+                    default: result = input;
+                }
+                if (state.numeralType === 'eastern') result = this.convertNumbersToEasternArabic(result);
+                return result;
+            }
+            convertNumbersToEasternArabic(latex) {
+                if (!latex || typeof latex !== 'string') return latex;
+                const easternArabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                let result = '', inCommand = false, inBraces = 0, currentToken = '';
+                for (let i = 0; i < latex.length; i++) {
+                    const char = latex[i];
+                    if (char === '\\' && !inCommand) { if (currentToken) { result += currentToken.replace(/\d/g, d => easternArabicNumerals[d]); currentToken = ''; } inCommand = true; currentToken += char; continue; }
+                    if (char === '{') { inBraces++; currentToken += char; continue; }
+                    if (char === '}') { inBraces--; currentToken += char; continue; }
+                    if (inCommand && !/[a-zA-Z]/.test(char) && char !== '\\') { inCommand = false; result += currentToken; currentToken = ''; }
+                    currentToken += char;
+                    if (!inCommand && inBraces === 0 && /\s/.test(char)) { result += currentToken.replace(/\d/g, d => easternArabicNumerals[d]); currentToken = ''; }
+                }
+                if (currentToken) { if (!inCommand && inBraces === 0) result += currentToken.replace(/\d/g, d => easternArabicNumerals[d]); else result += currentToken; }
+                return result;
+            }
             renderEquation(element, formula, displayMode = false) {
                 if (!element || !formula) return;
-                try { katex.render(formula, element, { throwOnError: false, displayMode: displayMode }); }
-                catch (error) { element.textContent = formula; }
+                try {
+                    const latexFormula = this.convertToLaTeX(formula);
+                    katex.render(latexFormula, element, { throwOnError: false, displayMode: displayMode });
+                } catch (error) { element.textContent = formula; }
             }
-            refreshAllEquations() { }
+            refreshAllEquations() { /* غير مطلوب للطالب */ }
         }
         let equationRenderer;
         const quizConfig = {
@@ -400,7 +428,7 @@
             isPaused: false,
             answeredQuestions: [],
             questions: [],
-            numeralType: 'arabic',
+            numeralType: 'eastern',
             questionTime: 30
         };
         function init() {
@@ -595,13 +623,20 @@
             showQuestion();
         }
         function convertToSelectedNumerals(num) {
-            if (num === undefined || num === null) return "0";
-            return num.toString();
+            if (num === undefined || num === null) return "٠";
+            return toEasternArabicNumerals(num);
         }
         function convertTextNumerals(text) {
             if (!text || typeof text !== 'string') return text;
             if (text.includes('\\') || text.includes('$')) return text;
-            return text.replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
+            return text.replace(/\d/g, digit => {
+                const easternArabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                return easternArabicNumerals[digit];
+            });
+        }
+        function toEasternArabicNumerals(num) {
+            const easternArabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            return num.toString().replace(/\d/g, digit => easternArabicNumerals[digit]);
         }
         function updateQuestionCounter() {
             document.getElementById('questionCounter').textContent =
@@ -692,6 +727,7 @@
             document.querySelector('.quiz-box').style.display = 'block';
             document.getElementById('quizTitle').textContent = quizConfig.title;
             document.getElementById('instructions').textContent = quizConfig.instructions;
+            // تحميل الأسئلة تلقائيًا من نفس مجلد الصفحة
             loadQuestionsFromJSON('quiz_questions.json');
         };
     </script>
